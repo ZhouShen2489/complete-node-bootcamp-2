@@ -1,6 +1,9 @@
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
+
+const slugify = require('slugify');
+
 const replaceTemplate = require("./modules/replaceTemplate");
 
 ////////////////////////
@@ -45,7 +48,16 @@ const tempProduct = fs.readFileSync(
   "utf-8"
 ); // data is json here
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8"); // data is json here
-const dataObj = JSON.parse(data); // turn json into javascript Object
+let dataObj = JSON.parse(data); // turn json into javascript Object
+
+
+// Change the address query id to product name
+const slugs = dataObj.map(el => slugify(el.productName, {lower:true}));
+// console.log(slugs);
+dataObj.forEach((el, index) => {
+  el.slug = slugs[index];
+})
+
 
 const server = http.createServer((req, res) => {
   const { query, pathname } = url.parse(req.url, true);
@@ -63,7 +75,8 @@ const server = http.createServer((req, res) => {
     // Product page
   } else if (pathname === "/product") {
     res.writeHead(200, { "Content-type": "text/html" });
-    const output = replaceTemplate(tempProduct, dataObj[query.id]);
+    const chosenProduct = dataObj.find((el)=>el.slug === query.id);
+    const output = replaceTemplate(tempProduct, chosenProduct);
     res.end(output);
 
     // api page
