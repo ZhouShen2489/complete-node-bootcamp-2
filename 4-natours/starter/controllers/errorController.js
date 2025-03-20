@@ -1,3 +1,22 @@
+const AppError = require('../utils/appError');
+
+const handleCastErrorDB = err => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
+
+const handleDuplicateFieldsDB = err => {
+  const value = err.message.match(/"([^"]+)"/)[0];
+  const message = `Duplicate field value: ${value}. Please use another value!`;
+  return new AppError(message, 400);
+};
+
+const handleValicationErrorDB = err => {
+  const errors = Object.values(err.errors).map(el => el.message);
+  const message = `Validation Error: ${errors.join('.  ')}`;
+  return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -34,7 +53,24 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    sendErrorProd(err, res);
+    // manually copy non-enumerable properties of err
+    let error = {
+      message: err.message,
+      name: err.name,
+      stack: err.stack,
+      ...err
+    };
+
+    // 1) MongoDB error, invalid ID
+    if (error.name === 'CastError') {
+      error = handleCastErrorDB(error);
+    } else if (error.code === 11000) {
+      error = handleDuplicateFieldsDB(error);
+    } else if (error.name === 'ValidationError') {
+      error = handleValicationErrorDB(error);
+    }
+
+    sendErrorProd(error, res);
   }
 
   next();
