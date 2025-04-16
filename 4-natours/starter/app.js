@@ -74,11 +74,16 @@ app.use((req, res, next) => {
 });
 // 3) Routes
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 app.use('/', (req, res) => {
   res.status(200).render('base', {
     tour: 'The Forest Hiker',
     user: 'zhou shen'
   });
+=======
+app.get('/', (req, res) => {
+  res.status(200).render('base');
+>>>>>>> Stashed changes
 =======
 app.get('/', (req, res) => {
   res.status(200).render('base');
