@@ -23,7 +23,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public'))); //access static files in folder
 
 // Set security HTTP headers
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // Serving static files
 app.use(express.static(path.join(__dirname, 'public'))); //access static files in folder
