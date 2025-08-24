@@ -13,7 +13,9 @@ router.route('/resetPassword/:token').patch(authController.resetPassword);
 // Protect all routes after this middleware
 router.use(authController.protect);
 router.route('/updateMyPassword').patch(authController.updateMyPassword);
-router.route('/updateMe').patch(userController.updateMe);
+router
+  .route('/updateMe')
+  .patch(userController.uploadUserPhoto, userController.updateMe);
 router.route('/deleteMe').delete(userController.deleteMe);
 router.route('/me').get(userController.getMe, userController.getUser);
 
